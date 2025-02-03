@@ -50,7 +50,7 @@ public class QueueServiceImpl implements QueueService {
             return response.getStatusCode().is2xxSuccessful();
 
         } catch (Exception e) {
-            log.error("Error al enviar mediciones: " + e.getMessage());
+            log.error("❌ Error al enviar mediciones: " + e.getMessage());
             return false;
         }
     }
@@ -59,23 +59,23 @@ public class QueueServiceImpl implements QueueService {
     public boolean enqueueAnomaly(List<AnomalyDTO> anomalyList) {
         String url = domain + "/send/anomaly";
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<List<AnomalyDTO>> requestEntity = new HttpEntity<>(anomalyList, headers);
+        ResponseEntity<Void> response = null;
 
-        try {
+        for (AnomalyDTO anomalyDTO : anomalyList) {
+            try {
+                HttpEntity<AnomalyDTO> requestEntity = new HttpEntity<>(anomalyDTO, headers);
+                response = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        requestEntity,
+                        Void.class);
 
-            ResponseEntity<Void> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    requestEntity,
-                    Void.class);
-
-            // Retorna true si el estado es 200-299
-            return response.getStatusCode().is2xxSuccessful();
-
-        } catch (Exception e) {
-            log.error("Error al enviar anomalias: " + e.getMessage());
-            return false;
+            } catch (Exception e) {
+                log.error("❌ Error al enviar anomalias: {}", e.getMessage());
+            }
         }
+
+        // Retorna true si el estado es 200-299
+        return response.getStatusCode().is2xxSuccessful();
     }
 }
