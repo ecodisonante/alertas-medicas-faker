@@ -17,9 +17,10 @@ COPY --from=builder /app/target/*.jar app.jar
 
 # Configuración de la aplicación
 EXPOSE 8090
-ENV API_VITALSIGNS_URL=http://signs:8083 \
-    API_PATIENT_URL=http://patient:8082 \
-    API_QUEUE_URL=http://queue:8086 \
+
+ENV API_VITALSIGNS_URL=http://signos-service:8083 \
+    API_PATIENT_URL=http://paciente-service:8082 \
+    API_QUEUE_URL=http://cola-service:8086 \
     EXECUTION_TIME=300000
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
