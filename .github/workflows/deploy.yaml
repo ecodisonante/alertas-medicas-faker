@@ -35,7 +35,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            --file ./Dockerfile \ 
+            --file ./Dockerfile \
             --build-arg API_VITALSIGNS_URL=http://signs:8083 \
             --build-arg API_PATIENT_URL=http://patient:8082 \
             --build-arg API_QUEUE_URL=http://measurement:8086 \
