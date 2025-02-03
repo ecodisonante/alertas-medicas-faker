@@ -49,19 +49,24 @@ public class FakerServiceImpl implements FakerService {
 
     @Scheduled(fixedRateString = "${execution.time:300000}") // Tiempo de reejecucion
     public void executeMeasurementFaker() {
-        log.info("🚀 Generando mediciones...");
+        try {
+            log.info("🚀 Generando mediciones...");
 
-        this.fakerList = generateFakerList();
-        this.anomaliesList = generateAnomaliesList(fakerList);
+            this.fakerList = generateFakerList();
+            this.anomaliesList = generateAnomaliesList(fakerList);
 
-        log.info("✅ Mediciones generadas: {}", fakerList.size());
-        log.info("⚠ Anomalías detectadas: {}", anomaliesList.size());
+            log.info("✅ Mediciones generadas: {}", fakerList.size());
+            log.info("⚠ Anomalías detectadas: {}", anomaliesList.size());
 
-        if (!fakerList.isEmpty())
-            sendFakerListToProductor();
-        if (!this.anomaliesList.isEmpty())
-            sendAnomalyListToProductor();
-            
+            if (!fakerList.isEmpty())
+                sendFakerListToProductor();
+            if (!this.anomaliesList.isEmpty())
+                sendAnomalyListToProductor();
+
+        } catch (Exception e) {
+            log.error("❌ Error al generar lista de mediciones: {}\n{}", e.getMessage());
+            log.error(e);
+        }
     }
 
     @Override
@@ -77,22 +82,18 @@ public class FakerServiceImpl implements FakerService {
     private List<FakerDTO> generateFakerList() {
         List<FakerDTO> newFakerList = new ArrayList<>();
 
-        try {
-            var patientList = patientService.getPatients();
-            this.signList = vitalSignService.getVitalSigns();
+        var patientList = patientService.getPatients();
+        this.signList = vitalSignService.getVitalSigns();
 
-            for (PatientDTO patient : patientList) {
-                var faker = new FakerDTO(patient, new ArrayList<>());
+        for (PatientDTO patient : patientList) {
+            var faker = new FakerDTO(patient, new ArrayList<>());
 
-                for (VitalSignDTO sign : signList) {
-                    var measurement = generateMeasurement(patient.id(), sign);
-                    faker.measurements().add(measurement);
-                }
-
-                newFakerList.add(faker);
+            for (VitalSignDTO sign : signList) {
+                var measurement = generateMeasurement(patient.id(), sign);
+                faker.measurements().add(measurement);
             }
-        } catch (Exception e) {
-            log.error("Error al generar lista de mediciones: {}\n{}", e.getMessage(), e.getStackTrace());
+
+            newFakerList.add(faker);
         }
 
         return newFakerList;
