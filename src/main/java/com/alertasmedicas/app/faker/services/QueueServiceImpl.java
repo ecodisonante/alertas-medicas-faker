@@ -33,7 +33,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public boolean enqueueFakerList(List<FakerDTO> fakerList) {
-        String url = domain + "/send/pacientMeasures";
+        String url = domain + "/queue/send/pacientMeasures";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List<FakerDTO>> requestEntity = new HttpEntity<>(fakerList, headers);
@@ -57,7 +57,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public boolean enqueueAnomaly(List<MeasurementDTO> anomalyList) {
-        String url = domain + "/send/anomaly";
+        String url = domain + "/queue/send/anomaly";
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Void> response = null;
 
