@@ -61,8 +61,8 @@ public class QueueServiceImpl implements QueueService {
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Void> response = null;
 
-        for (MeasurementDTO anomalyDTO : anomalyList) {
-            try {
+        try {
+            for (MeasurementDTO anomalyDTO : anomalyList) {
                 HttpEntity<MeasurementDTO> requestEntity = new HttpEntity<>(anomalyDTO, headers);
                 response = restTemplate.exchange(
                         url,
@@ -70,12 +70,14 @@ public class QueueServiceImpl implements QueueService {
                         requestEntity,
                         Void.class);
 
-            } catch (Exception e) {
-                log.error("❌ Error al enviar anomalias: {}", e.getMessage());
             }
+
+        } catch (Exception e) {
+            log.error("❌ Error al enviar anomalias: {}", e.getMessage());
+            return false;
         }
 
         // Retorna true si el estado es 200-299
-        return response.getStatusCode().is2xxSuccessful();
+        return response != null && response.getStatusCode().is2xxSuccessful();
     }
 }
