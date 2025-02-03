@@ -44,19 +44,19 @@ public class FakerServiceImpl implements FakerService {
 
     @PostConstruct // ejecuta automaticamente cuando inicia el microservicio
     public void init() {
-        log.info("Faker iniciado");
+        log.info("🚀 Faker iniciado");
         executeMeasurementFaker();
     }
 
     @Scheduled(fixedRateString = "${execution.time:300000}") // Tiempo de reejecucion
     public void executeMeasurementFaker() {
-        log.info("Generando mediciones...");
+        log.info("🚀 Generando mediciones...");
 
         this.fakerList = generateFakerList();
         this.anomaliesList = generateAnomaliesList(fakerList);
 
-        log.info("Mediciones generadas: " + fakerList.size());
-        log.info("Anomalías detectadas: " + anomaliesList.size());
+        log.info("✅ Mediciones generadas: {}", fakerList.size());
+        log.info("⚠ Anomalías detectadas: {}", anomaliesList.size());
 
         sendFakerListToProductor();
         sendAnomalyListToProductor();
