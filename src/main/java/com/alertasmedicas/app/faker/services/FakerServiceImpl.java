@@ -56,7 +56,7 @@ public class FakerServiceImpl implements FakerService {
             this.anomaliesList = generateAnomaliesList(fakerList);
 
             log.info("✅ Mediciones generadas: {}", fakerList.size());
-            log.info("⚠ Anomalías detectadas: {}", anomaliesList.size());
+            log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
 
             if (!fakerList.isEmpty())
                 sendFakerListToProductor();
@@ -123,7 +123,7 @@ public class FakerServiceImpl implements FakerService {
         double lowerLimit = vitalSign.lowerLimit() - variation;
         double upperLimit = vitalSign.upperLimit() + variation;
 
-        double randomValue = (lowerLimit - variation) + ((upperLimit + variation) * random.nextDouble());
+        double randomValue = lowerLimit + (upperLimit - lowerLimit) * random.nextDouble();
         double roundedValue = BigDecimal.valueOf(randomValue).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
         return new MeasurementDTO(null, patientId, vitalSign.id(), roundedValue, LocalDateTime.now());
