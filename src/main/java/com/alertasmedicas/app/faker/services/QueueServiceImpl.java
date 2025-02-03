@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.alertasmedicas.app.faker.dto.AnomalyDTO;
 import com.alertasmedicas.app.faker.dto.FakerDTO;
+import com.alertasmedicas.app.faker.dto.MeasurementDTO;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -56,14 +56,14 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public boolean enqueueAnomaly(List<AnomalyDTO> anomalyList) {
+    public boolean enqueueAnomaly(List<MeasurementDTO> anomalyList) {
         String url = domain + "/send/anomaly";
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Void> response = null;
 
-        for (AnomalyDTO anomalyDTO : anomalyList) {
+        for (MeasurementDTO anomalyDTO : anomalyList) {
             try {
-                HttpEntity<AnomalyDTO> requestEntity = new HttpEntity<>(anomalyDTO, headers);
+                HttpEntity<MeasurementDTO> requestEntity = new HttpEntity<>(anomalyDTO, headers);
                 response = restTemplate.exchange(
                         url,
                         HttpMethod.POST,
