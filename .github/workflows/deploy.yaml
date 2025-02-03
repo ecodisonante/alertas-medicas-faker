@@ -79,10 +79,9 @@ jobs:
               -p 8090:8090 \
               --env "cors.allowed-origins=${{ secrets.CORS_ALLOWED_ORIGINS }}" \
               --env "server.port=8090" \
-              --env "spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${{ secrets.JWK_SET_URI }}" \
               --env "spring.application.name=faker" \
-              --env "api.vitalsigns=http://signs:8083" \
+              --env "api.vitalsigns=http://signos-service:8083" \
               --env "api.patient=http://paciente-service:8082" \
-              --env "api.queue=http://queue:8086" \
+              --env "api.queue=http://cola-service:8086" \
               --env "execution.time=300000" \
               "$DOCKER_IMAGE_NAME:$TAG"
