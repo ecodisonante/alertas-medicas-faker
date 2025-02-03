@@ -83,6 +83,6 @@ jobs:
               --env "spring.application.name=faker" \
               --env "api.vitalsigns=http://signs:8083" \
               --env "api.patient=http://paciente-service:8082" \
-              --env "api.measurement=http://queue:8086" \
+              --env "api.queue=http://queue:8086" \
               --env "execution.time=300000" \
               "$DOCKER_IMAGE_NAME:$TAG"
