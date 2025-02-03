@@ -57,8 +57,11 @@ public class FakerServiceImpl implements FakerService {
         log.info("✅ Mediciones generadas: {}", fakerList.size());
         log.info("⚠ Anomalías detectadas: {}", anomaliesList.size());
 
-        sendFakerListToProductor();
-        sendAnomalyListToProductor();
+        if (!fakerList.isEmpty())
+            sendFakerListToProductor();
+        if (!this.anomaliesList.isEmpty())
+            sendAnomalyListToProductor();
+            
     }
 
     @Override
@@ -72,20 +75,24 @@ public class FakerServiceImpl implements FakerService {
     }
 
     private List<FakerDTO> generateFakerList() {
-
-        var patientList = patientService.getPatients();
-        this.signList = vitalSignService.getVitalSigns();
-
         List<FakerDTO> newFakerList = new ArrayList<>();
-        for (PatientDTO patient : patientList) {
-            var faker = new FakerDTO(patient, new ArrayList<>());
 
-            for (VitalSignDTO sign : signList) {
-                var measurement = generateMeasurement(patient.id(), sign);
-                faker.measurements().add(measurement);
+        try {
+            var patientList = patientService.getPatients();
+            this.signList = vitalSignService.getVitalSigns();
+
+            for (PatientDTO patient : patientList) {
+                var faker = new FakerDTO(patient, new ArrayList<>());
+
+                for (VitalSignDTO sign : signList) {
+                    var measurement = generateMeasurement(patient.id(), sign);
+                    faker.measurements().add(measurement);
+                }
+
+                newFakerList.add(faker);
             }
-
-            newFakerList.add(faker);
+        } catch (Exception e) {
+            log.error("Error al generar lista de mediciones: {}\n{}", e.getMessage(), e.getStackTrace());
         }
 
         return newFakerList;
