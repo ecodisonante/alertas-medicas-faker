@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.alertasmedicas.app.faker.dto.AnomalyDTO;
 import com.alertasmedicas.app.faker.dto.FakerDTO;
+import com.alertasmedicas.app.faker.dto.MeasurementDTO;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +33,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public boolean enqueueFakerList(List<FakerDTO> fakerList) {
-        String url = domain + "/send/pacientMeasures";
+        String url = domain + "/queue/send/pacientMeasures";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List<FakerDTO>> requestEntity = new HttpEntity<>(fakerList, headers);
@@ -50,32 +50,34 @@ public class QueueServiceImpl implements QueueService {
             return response.getStatusCode().is2xxSuccessful();
 
         } catch (Exception e) {
-            log.error("Error al enviar mediciones: " + e.getMessage());
+            log.error("❌ Error al enviar mediciones: " + e.getMessage());
             return false;
         }
     }
 
     @Override
-    public boolean enqueueAnomaly(List<AnomalyDTO> anomalyList) {
-        String url = domain + "/send/anomaly";
+    public boolean enqueueAnomaly(List<MeasurementDTO> anomalyList) {
+        String url = domain + "/queue/send/anomaly";
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<List<AnomalyDTO>> requestEntity = new HttpEntity<>(anomalyList, headers);
+        ResponseEntity<Void> response = null;
 
         try {
+            for (MeasurementDTO anomalyDTO : anomalyList) {
+                HttpEntity<MeasurementDTO> requestEntity = new HttpEntity<>(anomalyDTO, headers);
+                response = restTemplate.exchange(
+                        url,
+                        HttpMethod.POST,
+                        requestEntity,
+                        Void.class);
 
-            ResponseEntity<Void> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    requestEntity,
-                    Void.class);
-
-            // Retorna true si el estado es 200-299
-            return response.getStatusCode().is2xxSuccessful();
+            }
 
         } catch (Exception e) {
-            log.error("Error al enviar anomalias: " + e.getMessage());
+            log.error("❌ Error al enviar anomalias: {}", e.getMessage());
             return false;
         }
+
+        // Retorna true si el estado es 200-299
+        return response != null && response.getStatusCode().is2xxSuccessful();
     }
 }

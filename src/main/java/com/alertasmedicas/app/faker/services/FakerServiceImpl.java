@@ -5,7 +5,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.alertasmedicas.app.faker.dto.FakerDTO;
-import com.alertasmedicas.app.faker.dto.AnomalyDTO;
 import com.alertasmedicas.app.faker.dto.MeasurementDTO;
 import com.alertasmedicas.app.faker.dto.PatientDTO;
 import com.alertasmedicas.app.faker.dto.VitalSignDTO;
@@ -31,7 +30,7 @@ public class FakerServiceImpl implements FakerService {
     private final QueueService queueService;
 
     private List<FakerDTO> fakerList = new ArrayList<>();
-    private List<AnomalyDTO> anomaliesList = new ArrayList<>();
+    private List<MeasurementDTO> anomaliesList = new ArrayList<>();
     private List<VitalSignDTO> signList = new ArrayList<>();
 
     @Autowired
@@ -44,22 +43,30 @@ public class FakerServiceImpl implements FakerService {
 
     @PostConstruct // ejecuta automaticamente cuando inicia el microservicio
     public void init() {
-        log.info("Faker iniciado");
+        log.info("🚀 Faker iniciado");
         executeMeasurementFaker();
     }
 
     @Scheduled(fixedRateString = "${execution.time:300000}") // Tiempo de reejecucion
     public void executeMeasurementFaker() {
-        log.info("Generando mediciones...");
+        try {
+            log.info("🚀 Generando mediciones...");
 
-        this.fakerList = generateFakerList();
-        this.anomaliesList = generateAnomaliesList(fakerList);
+            this.fakerList = generateFakerList();
+            this.anomaliesList = generateAnomaliesList(fakerList);
 
-        log.info("Mediciones generadas: " + fakerList.size());
-        log.info("Anomalías detectadas: " + anomaliesList.size());
+            log.info("✅ Mediciones generadas: {}", fakerList.size());
+            log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
 
-        sendFakerListToProductor();
-        sendAnomalyListToProductor();
+            if (!fakerList.isEmpty())
+                sendFakerListToProductor();
+            if (!this.anomaliesList.isEmpty())
+                sendAnomalyListToProductor();
+
+        } catch (Exception e) {
+            log.error("❌ Error al generar lista de mediciones: {}\n{}", e.getMessage());
+            log.error(e);
+        }
     }
 
     @Override
@@ -68,16 +75,16 @@ public class FakerServiceImpl implements FakerService {
     }
 
     @Override
-    public List<AnomalyDTO> getAnomaliesList() {
+    public List<MeasurementDTO> getAnomaliesList() {
         return anomaliesList;
     }
 
     private List<FakerDTO> generateFakerList() {
+        List<FakerDTO> newFakerList = new ArrayList<>();
 
         var patientList = patientService.getPatients();
         this.signList = vitalSignService.getVitalSigns();
 
-        List<FakerDTO> newFakerList = new ArrayList<>();
         for (PatientDTO patient : patientList) {
             var faker = new FakerDTO(patient, new ArrayList<>());
 
@@ -92,34 +99,20 @@ public class FakerServiceImpl implements FakerService {
         return newFakerList;
     }
 
-    private List<AnomalyDTO> generateAnomaliesList(List<FakerDTO> fakerList) {
-        List<AnomalyDTO> newAnomalyList = new ArrayList<>();
+    private List<MeasurementDTO> generateAnomaliesList(List<FakerDTO> fakerList) {
 
         if (this.signList.isEmpty())
             this.signList = vitalSignService.getVitalSigns();
 
-        for (FakerDTO faker : fakerList) {
-            for (MeasurementDTO measurement : faker.measurements()) {
-                var sign = signList.stream().filter(x -> x.id().equals(measurement.idSing()))
-                        .findFirst();
-
-                if (sign.isPresent()) {
-                    if (measurement.measurementValue() > sign.get().upperLimit()) {
-                        String status = String.format("%s: %.1f", sign.get().upperName(),
-                                measurement.measurementValue());
-                        newAnomalyList.add(new AnomalyDTO(faker.patient().id(), status, measurement.dateTime()));
-                    }
-
-                    if (measurement.measurementValue() < sign.get().lowerLimit()) {
-                        String status = String.format("%s: %.1f", sign.get().lowerName(),
-                                measurement.measurementValue());
-                        newAnomalyList.add(new AnomalyDTO(faker.patient().id(), status, measurement.dateTime()));
-                    }
-                }
-            }
-        }
-
-        return newAnomalyList;
+        return fakerList.stream() // Stream de fakers
+                .flatMap(faker -> faker.measurements().stream() // Stream de mediciones de cada faker
+                        .flatMap(measurement -> signList.stream()
+                                .filter(sign -> sign.id().equals(measurement.idSing()) &&
+                                        (measurement.measurementValue() > sign.upperLimit() ||
+                                                measurement.measurementValue() < sign.lowerLimit()))
+                                .map(sign -> measurement) // Si cumple la condición, agregar medición
+                        ))
+                .toList();
     }
 
     public MeasurementDTO generateMeasurement(Long patientId, VitalSignDTO vitalSign) {
@@ -130,7 +123,7 @@ public class FakerServiceImpl implements FakerService {
         double lowerLimit = vitalSign.lowerLimit() - variation;
         double upperLimit = vitalSign.upperLimit() + variation;
 
-        double randomValue = (lowerLimit + (upperLimit - lowerLimit) * random.nextDouble()) + variation;
+        double randomValue = lowerLimit + (upperLimit - lowerLimit) * random.nextDouble();
         double roundedValue = BigDecimal.valueOf(randomValue).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
         return new MeasurementDTO(null, patientId, vitalSign.id(), roundedValue, LocalDateTime.now());

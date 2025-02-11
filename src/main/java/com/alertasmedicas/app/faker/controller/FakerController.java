@@ -26,13 +26,13 @@ public class FakerController {
 
     @GetMapping("/fakeAllPatients")
     public ResponseEntity<List<FakerDTO>> fakeAllPatients() {
-        log.info("Generando mediciones para todos los pacientes...");
+        log.info("🚀 Generando mediciones para todos los pacientes...");
         try {
             List<FakerDTO> fakers = this.fakerService.getFakerList();
-            log.info("Lista de fakers generada exitosamente. Total: {} pacientes.", fakers.size());
+            log.info("📌 Lista de fakers generada exitosamente. Total: {} pacientes.", fakers.size());
             return ResponseEntity.ok(fakers);
         } catch (Exception e) {
-            log.error("Error al generar la lista de fakers: {}", e.getMessage(), e);
+            log.error("❌ Error al generar la lista de fakers: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
