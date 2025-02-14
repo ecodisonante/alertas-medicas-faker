@@ -76,9 +76,9 @@ jobs:
             # Ejecutar el nuevo contenedor
             sudo docker run -d --name faker \
               --network app-network \
-              -p 8090:8090 \
+              -p 8092:8092 \
               --env "cors.allowed-origins=${{ secrets.CORS_ALLOWED_ORIGINS }}" \
-              --env "server.port=8090" \
+              --env "server.port=8092" \
               --env "spring.application.name=faker" \
               --env "api.vitalsigns=http://signos-service:8083" \
               --env "api.patient=http://paciente-service:8082" \
