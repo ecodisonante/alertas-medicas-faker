@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 # Configuración de la aplicación
-EXPOSE 8090
+EXPOSE 8092
 
 ENV API_VITALSIGNS_URL=http://signos-service:8083 \
     API_PATIENT_URL=http://paciente-service:8082 \

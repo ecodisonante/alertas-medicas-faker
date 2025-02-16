@@ -32,8 +32,7 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public boolean enqueueFakerList(List<FakerDTO> fakerList) {
-        String url = domain + "/queue/send/pacientMeasures";
+    public boolean enqueueFakerList(List<FakerDTO> fakerList, String domain) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<List<FakerDTO>> requestEntity = new HttpEntity<>(fakerList, headers);
@@ -41,7 +40,7 @@ public class QueueServiceImpl implements QueueService {
         try {
 
             ResponseEntity<Void> response = restTemplate.exchange(
-                    url,
+                    domain,
                     HttpMethod.POST,
                     requestEntity,
                     Void.class);

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface QueueService {
 
-    boolean enqueueFakerList(List<FakerDTO> fakerList);
+    boolean enqueueFakerList(List<FakerDTO> fakerList, String domain);
 
     boolean enqueueAnomaly(List<MeasurementDTO> anomalyList);
 
