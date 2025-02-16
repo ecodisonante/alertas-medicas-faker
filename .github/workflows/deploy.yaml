@@ -85,7 +85,7 @@ jobs:
               --env "api.queue=http://queue-producer:8086" \
               --env "api.queue.measure=/queue/send/pacientMeasures" \
               --env "api.queue.anomaly=/queue/send/anomaly" \
-              --env "api.kafka=http://localhost:8087" \
+              --env "api.kafka=http://kafka-producer:8088" \
               --env "api.kafka.measure=/kafka/send" \
               --env "execution.time=300000" \
               "$DOCKER_IMAGE_NAME:$TAG"
