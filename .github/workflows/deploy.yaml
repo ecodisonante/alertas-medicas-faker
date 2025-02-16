@@ -83,5 +83,9 @@ jobs:
               --env "api.vitalsigns=http://signos-service:8083" \
               --env "api.patient=http://paciente-service:8082" \
               --env "api.queue=http://queue-producer:8086" \
+              --env "api.queue.measure=/queue/send/pacientMeasures" \
+              --env "api.queue.anomaly=/queue/send/anomaly" \
+              --env "api.kafka=http://localhost:8087" \
+              --env "api.kafka.measure=/kafka/send" \
               --env "execution.time=300000" \
               "$DOCKER_IMAGE_NAME:$TAG"
