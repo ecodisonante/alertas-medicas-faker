@@ -39,7 +39,7 @@ jobs:
             --build-arg API_VITALSIGNS_URL=http://signs:8083 \
             --build-arg API_PATIENT_URL=http://patient:8082 \
             --build-arg API_QUEUE_URL=http://measurement:8086 \
-            --build-arg EXECUTION_TIME=300000 \
+            --build-arg EXECUTION_TIME=1000 \
             --tag $DOCKER_IMAGE_NAME:$TAG \
             --tag $DOCKER_IMAGE_NAME:latest \
             .
@@ -87,5 +87,5 @@ jobs:
               --env "api.queue.anomaly=/queue/send/anomaly" \
               --env "api.kafka=http://kafka-producer:8088" \
               --env "api.kafka.measure=/kafka/send" \
-              --env "execution.time=300000" \
+              --env "execution.time=1000" \
               "$DOCKER_IMAGE_NAME:$TAG"
