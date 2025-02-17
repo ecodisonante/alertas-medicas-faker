@@ -39,7 +39,7 @@ jobs:
             --build-arg API_VITALSIGNS_URL=http://signs:8083 \
             --build-arg API_PATIENT_URL=http://patient:8082 \
             --build-arg API_QUEUE_URL=http://measurement:8086 \
-            --build-arg EXECUTION_TIME=300000 \
+            --build-arg EXECUTION_TIME=1000 \
             --tag $DOCKER_IMAGE_NAME:$TAG \
             --tag $DOCKER_IMAGE_NAME:latest \
             .
@@ -76,12 +76,16 @@ jobs:
             # Ejecutar el nuevo contenedor
             sudo docker run -d --name faker \
               --network app-network \
-              -p 8090:8090 \
+              -p 8092:8092 \
               --env "cors.allowed-origins=${{ secrets.CORS_ALLOWED_ORIGINS }}" \
-              --env "server.port=8090" \
+              --env "server.port=8092" \
               --env "spring.application.name=faker" \
               --env "api.vitalsigns=http://signos-service:8083" \
               --env "api.patient=http://paciente-service:8082" \
               --env "api.queue=http://queue-producer:8086" \
-              --env "execution.time=300000" \
+              --env "api.queue.measure=/queue/send/pacientMeasures" \
+              --env "api.queue.anomaly=/queue/send/anomaly" \
+              --env "api.kafka=http://kafka-producer:8088" \
+              --env "api.kafka.measure=/kafka/send" \
+              --env "execution.time=1000" \
               "$DOCKER_IMAGE_NAME:$TAG"

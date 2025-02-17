@@ -1,6 +1,7 @@
 package com.alertasmedicas.app.faker.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,18 @@ public class FakerServiceImpl implements FakerService {
     private List<MeasurementDTO> anomaliesList = new ArrayList<>();
     private List<VitalSignDTO> signList = new ArrayList<>();
 
+    @Value("${api.queue:}")
+    private String queueDomain;
+
+    @Value("${api.queue.measure:}")
+    private String queueMeasure;
+
+    @Value("${api.kafka:}")
+    private String kafkaDomain;
+
+    @Value("${api.kafka.measure:}")
+    private String kafkaMeasure;
+
     @Autowired
     public FakerServiceImpl(PatientService patientService, VitalSignService vitalSignService,
             QueueService queueService) {
@@ -47,25 +60,33 @@ public class FakerServiceImpl implements FakerService {
         executeMeasurementFaker();
     }
 
-    @Scheduled(fixedRateString = "${execution.time:300000}") // Tiempo de reejecucion
+    @Scheduled(fixedRateString = "${execution.time:15000}") // Tiempo de reejecucion
     public void executeMeasurementFaker() {
         try {
             log.info("🚀 Generando mediciones...");
 
             this.fakerList = generateFakerList();
-            this.anomaliesList = generateAnomaliesList(fakerList);
+            // this.anomaliesList = generateAnomaliesList(fakerList);
 
             log.info("✅ Mediciones generadas: {}", fakerList.size());
-            log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
+            // log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
 
-            if (!fakerList.isEmpty())
-                sendFakerListToProductor();
-            if (!this.anomaliesList.isEmpty())
+            if (!fakerList.isEmpty()) {
+                // Enviar medicion a cola de Rabbit
+                // log.info("🎯 Enviando mediciones a Rabbit");
+                // sendFakerListToProductor(queueDomain + queueMeasure);
+                
+                // Enviar medicion a stream de Kafka
+                log.info("🎯 Enviando mediciones a Kafka");
+                sendFakerListToProductor(kafkaDomain + kafkaMeasure);
+            }
+            if (!this.anomaliesList.isEmpty()) {
                 sendAnomalyListToProductor();
+            }
 
         } catch (Exception e) {
             log.error("❌ Error al generar lista de mediciones: {}\n{}", e.getMessage());
-            log.error(e);
+            log.error(e.getStackTrace());
         }
     }
 
@@ -140,8 +161,8 @@ public class FakerServiceImpl implements FakerService {
         };
     }
 
-    private boolean sendFakerListToProductor() {
-        return queueService.enqueueFakerList(fakerList);
+    private boolean sendFakerListToProductor(String domain) {
+        return queueService.enqueueFakerList(fakerList, domain);
     }
 
     private boolean sendAnomalyListToProductor() {
