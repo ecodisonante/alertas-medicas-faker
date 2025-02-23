@@ -66,7 +66,7 @@ public class FakerServiceImpl implements FakerService {
             log.info("🚀 Generando mediciones...");
 
             this.fakerList = generateFakerList();
-            // this.anomaliesList = generateAnomaliesList(fakerList);
+            this.anomaliesList = generateAnomaliesList(fakerList);
 
             log.info("✅ Mediciones generadas: {}", fakerList.size());
             log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
