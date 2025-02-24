@@ -60,24 +60,21 @@ public class FakerServiceImpl implements FakerService {
         executeMeasurementFaker();
     }
 
-    @Scheduled(fixedRateString = "${execution.time:15000}") // Tiempo de reejecucion
+    @Scheduled(fixedRateString = "${execution.time:300000}") // Tiempo de reejecucion
     public void executeMeasurementFaker() {
         try {
             log.info("🚀 Generando mediciones...");
 
             this.fakerList = generateFakerList();
-            // this.anomaliesList = generateAnomaliesList(fakerList);
+            this.anomaliesList = generateAnomaliesList(fakerList);
 
             log.info("✅ Mediciones generadas: {}", fakerList.size());
-            // log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
+            log.info("🔥 Anomalías detectadas: {}", anomaliesList.size());
 
             if (!fakerList.isEmpty()) {
                 // Enviar medicion a cola de Rabbit
-                // log.info("🎯 Enviando mediciones a Rabbit");
-                // sendFakerListToProductor(queueDomain + queueMeasure);
-                
+                sendFakerListToProductor(queueDomain + queueMeasure);
                 // Enviar medicion a stream de Kafka
-                log.info("🎯 Enviando mediciones a Kafka");
                 sendFakerListToProductor(kafkaDomain + kafkaMeasure);
             }
             if (!this.anomaliesList.isEmpty()) {
@@ -86,7 +83,7 @@ public class FakerServiceImpl implements FakerService {
 
         } catch (Exception e) {
             log.error("❌ Error al generar lista de mediciones: {}\n{}", e.getMessage());
-            log.error(e.getStackTrace());
+            log.error(e);
         }
     }
 
